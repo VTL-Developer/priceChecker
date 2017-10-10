@@ -65,7 +65,7 @@ func TestGetCost_ComplexJsonObjectWithIntsAsNamedPathsAndArrays(t *testing.T) {
 }
 
 func testGetCost(t *testing.T, jsonBody []byte, path []interface{}, expected float64) {
-	jsonObj := make(map[string]interface{})
+	var jsonObj interface{}
 	e := json.Unmarshal(jsonBody, &jsonObj)
 
 	if e != nil {
@@ -73,7 +73,7 @@ func testGetCost(t *testing.T, jsonBody []byte, path []interface{}, expected flo
 		return
 	}
 
-	got := GetCost(jsonObj, path)
+	got := GetCost(&jsonObj, &path)
 	if got != expected {
 		t.Errorf("GetCost returned %q, should be %q", got, expected)
 	}

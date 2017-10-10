@@ -4,14 +4,14 @@ import (
 //"encoding/json"
 )
 
-func GetCost(content interface{}, contentPath []interface{}) float64 {
+func GetCost(content *interface{}, contentPath *[]interface{}) float64 {
 	jsonObj := content
 	cost := -1.0
 	found := true
 	converted := true
 	name := ""
 	index := -1
-	for _, path := range contentPath {
+	for _, path := range *contentPath {
 		index, converted = path.(int)
 
 		if converted {
@@ -29,7 +29,7 @@ func GetCost(content interface{}, contentPath []interface{}) float64 {
 	}
 
 	if found {
-		cost, converted = jsonObj.(float64)
+		cost, converted = (*jsonObj).(float64)
 	}
 
 	if !converted {
@@ -39,26 +39,26 @@ func GetCost(content interface{}, contentPath []interface{}) float64 {
 	return cost
 }
 
-func getJsonObjectByName(content interface{}, name string) (interface{}, bool) {
-	jsonObj, ok := content.(map[string]interface{})
+func getJsonObjectByName(content *interface{}, name string) (*interface{}, bool) {
+	jsonObj, ok := (*content).(map[string]interface{})
 
 	if !ok {
 		return nil, ok
 	}
 
 	innerObj, ok := jsonObj[name].(interface{})
-	return innerObj, ok
+	return &innerObj, ok
 }
 
-func getJsonObjectByIndex(content interface{}, index int) (interface{}, bool) {
-	jsonObj, ok := content.([]interface{})
+func getJsonObjectByIndex(content *interface{}, index int) (*interface{}, bool) {
+	jsonObj, ok := (*content).([]interface{})
 
 	if !ok || len(jsonObj) < index+1 {
 		return nil, false
 	}
 
 	innerObj, ok := jsonObj[index].(interface{})
-	return innerObj, ok
+	return &innerObj, ok
 }
 
 func main() {
