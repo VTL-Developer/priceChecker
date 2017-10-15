@@ -4,14 +4,14 @@ import (
 //"encoding/json"
 )
 
-func GetCost(content *interface{}, contentPath *[]interface{}) float64 {
+func GetCost(content *interface{}, contentPath []interface{}) float64 {
 	jsonObj := content
 	cost := -1.0
 	found := true
 	converted := true
 	name := ""
 	index := -1
-	for _, path := range *contentPath {
+	for _, path := range contentPath {
 		index, converted = path.(int)
 
 		if converted {

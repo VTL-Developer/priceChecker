@@ -73,7 +73,7 @@ func testGetCost(t *testing.T, jsonBody []byte, path []interface{}, expected flo
 		return
 	}
 
-	got := GetCost(&jsonObj, &path)
+	got := GetCost(&jsonObj, path)
 	if got != expected {
 		t.Errorf("GetCost returned %q, should be %q", got, expected)
 	}
