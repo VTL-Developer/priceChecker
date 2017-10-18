@@ -6,15 +6,15 @@ import (
 )
 
 func TestAddPriceToLast24Hour_EmptyCase(t *testing.T) {
-	s := siteHistory{}
+	s := SiteHistory{}
 	s.AddPriceToLast24HourHistory(50.00)
 	validateSiteHistoryList(
 		t,
 		&s,
-		[]priceHistory{
+		[]PriceHistory{
 			makeMockPriceHistories(50.00, time.Now().UTC()),
 		},
-		[]priceHistory{})
+		[]PriceHistory{})
 }
 
 func TestAddPriceToLast24Hour_WhenTheresData(t *testing.T) {
@@ -22,8 +22,8 @@ func TestAddPriceToLast24Hour_WhenTheresData(t *testing.T) {
 	datetime[0] = time.Now().UTC()
 	datetime[1] = time.Now().UTC()
 
-	s := siteHistory{
-		Last24HourPriceHistory: []priceHistory{
+	s := SiteHistory{
+		Last24HourPriceHistory: []PriceHistory{
 			makeMockPriceHistories(50.0, datetime[0]),
 			makeMockPriceHistories(120.0, datetime[1]),
 		},
@@ -34,16 +34,16 @@ func TestAddPriceToLast24Hour_WhenTheresData(t *testing.T) {
 	validateSiteHistoryList(
 		t,
 		&s,
-		[]priceHistory{
+		[]PriceHistory{
 			makeMockPriceHistories(50.00, datetime[0]),
 			makeMockPriceHistories(120.00, datetime[1]),
 			makeMockPriceHistories(102.50, datetime[2]),
 		},
-		[]priceHistory{})
+		[]PriceHistory{})
 }
 
 func TestAddPriceToLast24Hour_MultipleCase(t *testing.T) {
-	s := siteHistory{}
+	s := SiteHistory{}
 	datetime := make([]time.Time, 3)
 	s.AddPriceToLast24HourHistory(50.00)
 	datetime[0] = time.Now().UTC()
@@ -55,22 +55,22 @@ func TestAddPriceToLast24Hour_MultipleCase(t *testing.T) {
 	validateSiteHistoryList(
 		t,
 		&s,
-		[]priceHistory{
+		[]PriceHistory{
 			makeMockPriceHistories(50.00, datetime[0]),
 			makeMockPriceHistories(120.00, datetime[1]),
 			makeMockPriceHistories(102.50, datetime[2]),
 		},
-		[]priceHistory{})
+		[]PriceHistory{})
 }
 
 func TestAddPriceToDayByDayHistory_EmptyCase(t *testing.T) {
-	s := siteHistory{}
+	s := SiteHistory{}
 	s.AddPriceToDayByDayHistory(50.00)
 	validateSiteHistoryList(
 		t,
 		&s,
-		[]priceHistory{},
-		[]priceHistory{
+		[]PriceHistory{},
+		[]PriceHistory{
 			makeMockPriceHistories(50.00, time.Now().UTC()),
 		})
 }
@@ -80,8 +80,8 @@ func TestAddPriceToDayByDayHistory_WhenTheresData(t *testing.T) {
 	datetime[0] = time.Now().UTC()
 	datetime[1] = time.Now().UTC()
 
-	s := siteHistory{
-		DayByDayPriceHistory: []priceHistory{
+	s := SiteHistory{
+		DayByDayPriceHistory: []PriceHistory{
 			makeMockPriceHistories(50.0, datetime[0]),
 			makeMockPriceHistories(120.0, datetime[1]),
 		},
@@ -92,8 +92,8 @@ func TestAddPriceToDayByDayHistory_WhenTheresData(t *testing.T) {
 	validateSiteHistoryList(
 		t,
 		&s,
-		[]priceHistory{},
-		[]priceHistory{
+		[]PriceHistory{},
+		[]PriceHistory{
 			makeMockPriceHistories(50.00, datetime[0]),
 			makeMockPriceHistories(120.00, datetime[1]),
 			makeMockPriceHistories(102.50, datetime[2]),
@@ -101,7 +101,7 @@ func TestAddPriceToDayByDayHistory_WhenTheresData(t *testing.T) {
 }
 
 func TestAddPriceToDayByDayHistory_MultipleCase(t *testing.T) {
-	s := siteHistory{}
+	s := SiteHistory{}
 	datetime := make([]time.Time, 3)
 	s.AddPriceToDayByDayHistory(50.00)
 	datetime[0] = time.Now().UTC()
@@ -113,8 +113,8 @@ func TestAddPriceToDayByDayHistory_MultipleCase(t *testing.T) {
 	validateSiteHistoryList(
 		t,
 		&s,
-		[]priceHistory{},
-		[]priceHistory{
+		[]PriceHistory{},
+		[]PriceHistory{
 			makeMockPriceHistories(50.00, datetime[0]),
 			makeMockPriceHistories(120.00, datetime[1]),
 			makeMockPriceHistories(102.50, datetime[2]),
@@ -123,13 +123,13 @@ func TestAddPriceToDayByDayHistory_MultipleCase(t *testing.T) {
 
 func TestTrimLast24HoursToN_ToLast1Item(t *testing.T) {
 	datetimes := getMockSetOfTime(9)
-	mockPriceHistories := make([]priceHistory, 9)
+	mockPriceHistories := make([]PriceHistory, 9)
 
 	for i, datetime := range datetimes {
 		mockPriceHistories[i] = makeMockPriceHistories(1.0, datetime)
 	}
 
-	s := siteHistory{
+	s := SiteHistory{
 		Last24HourPriceHistory: mockPriceHistories,
 	}
 
@@ -139,18 +139,18 @@ func TestTrimLast24HoursToN_ToLast1Item(t *testing.T) {
 		t,
 		&s,
 		mockPriceHistories[8:],
-		[]priceHistory{})
+		[]PriceHistory{})
 }
 
 func TestTrimLast24HoursToN_ToLast5Item(t *testing.T) {
 	datetimes := getMockSetOfTime(9)
-	mockPriceHistories := make([]priceHistory, 9)
+	mockPriceHistories := make([]PriceHistory, 9)
 
 	for i, datetime := range datetimes {
 		mockPriceHistories[i] = makeMockPriceHistories(1.0, datetime)
 	}
 
-	s := siteHistory{
+	s := SiteHistory{
 		Last24HourPriceHistory: mockPriceHistories,
 	}
 
@@ -160,18 +160,18 @@ func TestTrimLast24HoursToN_ToLast5Item(t *testing.T) {
 		t,
 		&s,
 		mockPriceHistories[4:],
-		[]priceHistory{})
+		[]PriceHistory{})
 }
 
 func TestTrimLast24HoursToN_ToLastNGreaterThanCount(t *testing.T) {
 	datetimes := getMockSetOfTime(9)
-	mockPriceHistories := make([]priceHistory, 9)
+	mockPriceHistories := make([]PriceHistory, 9)
 
 	for i, datetime := range datetimes {
 		mockPriceHistories[i] = makeMockPriceHistories(1.0, datetime)
 	}
 
-	s := siteHistory{
+	s := SiteHistory{
 		Last24HourPriceHistory: mockPriceHistories,
 	}
 
@@ -181,7 +181,7 @@ func TestTrimLast24HoursToN_ToLastNGreaterThanCount(t *testing.T) {
 		t,
 		&s,
 		mockPriceHistories[:],
-		[]priceHistory{})
+		[]PriceHistory{})
 }
 
 func getMockSetOfTime(count int) []time.Time {
@@ -195,35 +195,35 @@ func getMockSetOfTime(count int) []time.Time {
 	return datetimes
 }
 
-func makeMockPriceHistories(price float64, datetime time.Time) priceHistory {
-	return priceHistory{
-		price:    price,
-		datetime: datetime,
+func makeMockPriceHistories(price float64, datetime time.Time) PriceHistory {
+	return PriceHistory{
+		Price:    price,
+		Datetime: datetime,
 	}
 }
 
-func validateSiteHistoryList(t *testing.T, s *siteHistory, expectedLast24PriceHistory []priceHistory, expectedDayToDayHistory []priceHistory) {
+func validateSiteHistoryList(t *testing.T, s *SiteHistory, expectedLast24PriceHistory []PriceHistory, expectedDayToDayHistory []PriceHistory) {
 	validateSiteHistory(t, "Last24HourPriceHistory", s.Last24HourPriceHistory, expectedLast24PriceHistory)
 	validateSiteHistory(t, "DayByDayPriceHistory", s.DayByDayPriceHistory, expectedDayToDayHistory)
 }
 
-func validateSiteHistory(t *testing.T, typeOfHistory string, actualPriceHistory []priceHistory, expectedPriceHistory []priceHistory) {
+func validateSiteHistory(t *testing.T, typeOfHistory string, actualPriceHistory []PriceHistory, expectedPriceHistory []PriceHistory) {
 	if len(actualPriceHistory) != len(expectedPriceHistory) {
 		t.Errorf("length of %v and expected not the same, %v and %v, respectively", typeOfHistory,
 			len(actualPriceHistory), len(expectedPriceHistory))
 	}
 
 	for i, ph := range actualPriceHistory {
-		if ph.price != expectedPriceHistory[i].price {
+		if ph.Price != expectedPriceHistory[i].Price {
 			t.Errorf("price at [%v] is %v, should be %v", i,
-				ph.price, expectedPriceHistory[i].price)
+				ph.Price, expectedPriceHistory[i].Price)
 		}
 
-		timeDiff := expectedPriceHistory[i].datetime.Sub(ph.datetime)
+		timeDiff := expectedPriceHistory[i].Datetime.Sub(ph.Datetime)
 
 		if timeDiff.Seconds() > 1 {
 			t.Errorf("datetime at [%v] is %v, should be closer to %v", i,
-				ph.datetime, expectedPriceHistory[i].datetime)
+				ph.Datetime, expectedPriceHistory[i].Datetime)
 		}
 	}
 }

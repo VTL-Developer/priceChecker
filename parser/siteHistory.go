@@ -4,20 +4,20 @@ import (
 	"time"
 )
 
-type siteHistory struct {
-	Last24HourPriceHistory []priceHistory
-	DayByDayPriceHistory   []priceHistory
+type SiteHistory struct {
+	Last24HourPriceHistory []PriceHistory
+	DayByDayPriceHistory   []PriceHistory
 }
 
-func (s *siteHistory) AddPriceToLast24HourHistory(price float64) {
+func (s *SiteHistory) AddPriceToLast24HourHistory(price float64) {
 	s.Last24HourPriceHistory = addPriceToPriceHistory(price, s.Last24HourPriceHistory)
 }
 
-func (s *siteHistory) AddPriceToDayByDayHistory(price float64) {
+func (s *SiteHistory) AddPriceToDayByDayHistory(price float64) {
 	s.DayByDayPriceHistory = addPriceToPriceHistory(price, s.DayByDayPriceHistory)
 }
 
-func (s *siteHistory) TrimLast24HoursToN(n int) {
+func (s *SiteHistory) TrimLast24HoursToN(n int) {
 	length := len(s.Last24HourPriceHistory)
 
 	if length > n {
@@ -25,13 +25,13 @@ func (s *siteHistory) TrimLast24HoursToN(n int) {
 	}
 }
 
-func addPriceToPriceHistory(price float64, priceHistorySlice []priceHistory) []priceHistory {
+func addPriceToPriceHistory(price float64, priceHistorySlice []PriceHistory) []PriceHistory {
 	if price > 0 {
 		priceHistorySlice = (append(
 			priceHistorySlice,
-			priceHistory{
-				price:    price,
-				datetime: time.Now().UTC()}))
+			PriceHistory{
+				Price:    price,
+				Datetime: time.Now().UTC()}))
 	}
 
 	return priceHistorySlice
