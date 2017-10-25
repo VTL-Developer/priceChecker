@@ -9,12 +9,16 @@ import (
 
 var client = http.Client{Timeout: 10 * time.Second}
 
-func getDataAsJson(jsonBody []byte, target interface{}) error {
-	return json.Unmarshal(jsonBody, target)
-}
+func getDataAsJson(rsp *http.Response, target interface{}) error {
+	defer rsp.Body.Close()
+	jsonBody, err := ioutil.ReadAll(rsp.Body)
 
-func getDataAsHtml(htmlBody []byte, target interface{}) error {
-	return nil
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(jsonBody, target)
+	return err
 }
 
 func getHttpBodyResponse(url string, headers map[string]string) ([]byte, error) {
