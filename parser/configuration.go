@@ -5,9 +5,12 @@ import (
 	"io/ioutil"
 )
 
+var configuration Configuration
+
 type Configuration struct {
 	Database string
 	Password string
+	LogLevel logLevel
 }
 
 func GetConfiguration(filename string) (*Configuration, error) {
