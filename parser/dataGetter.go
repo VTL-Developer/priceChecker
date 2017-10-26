@@ -38,7 +38,7 @@ func getDataAsHtml(rsp *http.Response) (*interface{}, error) {
 	return &convertedDocument, nil
 }
 
-func getHttpBodyResponse(url string, headers map[string]string) ([]byte, error) {
+func getHttpBodyResponse(url string, headers map[string]string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
@@ -47,16 +47,9 @@ func getHttpBodyResponse(url string, headers map[string]string) ([]byte, error) 
 
 	if headers != nil {
 		for header, value := range headers {
-			req.Header.Add(header, value)
+			req.Header.Set(header, value)
 		}
 	}
 
-	rsp, err := client.Do(req)
-	defer rsp.Body.Close()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return ioutil.ReadAll(rsp.Body)
+	return client.Do(req)
 }

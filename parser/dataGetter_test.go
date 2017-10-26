@@ -66,6 +66,85 @@ func Test_getDataAsHtml(t *testing.T) {
 	}
 }
 
+func Test_getHttpBodyResponse_NilHeaders(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	rsp, err := getHttpBodyResponse(s.URL, nil)
+
+	if rsp != nil {
+		defer rsp.Body.Close()
+	}
+
+	if err != nil {
+		t.Errorf("Error occured: %v", err)
+		return
+	}
+
+	if rsp.Request.URL.String() != s.URL {
+		t.Errorf("Request URL was %q, should be %q", rsp.Request.URL, s.URL)
+	}
+
+	if len(rsp.Request.Header) != 0 {
+		t.Errorf("Request heaer should be empty, but has %q", rsp.Request.Header)
+	}
+}
+
+func Test_getHttpBodyResponse_EmptyHeaders(t *testing.T) {
+	headers := make(map[string]string)
+	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	rsp, err := getHttpBodyResponse(s.URL, headers)
+
+	if rsp != nil {
+		defer rsp.Body.Close()
+	}
+
+	if err != nil {
+		t.Errorf("Error occured: %v", err)
+		return
+	}
+
+	if rsp.Request.URL.String() != s.URL {
+		t.Errorf("Request URL was %q, should be %q", rsp.Request.URL, s.URL)
+	}
+
+	if len(rsp.Request.Header) != 0 {
+		t.Errorf("Request heaer should be empty, but has %q", rsp.Request.Header)
+	}
+}
+
+func Test_getHttpBodyResponse_WithHeaders(t *testing.T) {
+	headers := make(map[string]string)
+	headers["hello"] = "world"
+	headers["another"] = "item"
+
+	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	rsp, err := getHttpBodyResponse(s.URL, headers)
+
+	if rsp != nil {
+		defer rsp.Body.Close()
+	}
+
+	if err != nil {
+		t.Errorf("Error occured: %v", err)
+		return
+	}
+
+	if rsp.Request.URL.String() != s.URL {
+		t.Errorf("Request URL was %q, should be %q", rsp.Request.URL, s.URL)
+	}
+
+	if len(rsp.Request.Header) < 2 {
+		t.Errorf("Request heaer should have two items, but has %q item(s) with: %q", len(rsp.Request.Header), rsp.Request.Header)
+	}
+
+	if rsp.Request.Header.Get("hello") != "world" {
+		t.Errorf("Request headers should have 'hello: world' but has 'hello: %v'", rsp.Request.Header.Get("hello"))
+	}
+
+	if rsp.Request.Header.Get("another") != "item" {
+		t.Errorf("Request headers should have 'another: item' but has 'another: %v'", rsp.Request.Header.Get("another"))
+	}
+}
+
 func httpHandler(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(rw, `<html><head></head><body><span class="check">hello</span></body></html>`, path.Base(r.URL.Path))
 }
