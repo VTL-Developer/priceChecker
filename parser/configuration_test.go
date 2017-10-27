@@ -47,7 +47,7 @@ func TestGetConfiguration_ConfigurationWithLogLevel(t *testing.T) {
 	}
 
 	if configuration.LogLevel != errorLevel {
-		t.Errorf("Configuration log level should be info (%v), but it is set to %v", errorLevel, configuration.LogLevel)
+		t.Errorf("Configuration log level should be %v (info), but it is set to %v", errorLevel, configuration.LogLevel)
 	}
 }
 
