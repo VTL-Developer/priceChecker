@@ -9,6 +9,7 @@ import (
 type logLevel int
 
 const (
+	noLevel      logLevel = iota
 	fatalLevel   logLevel = iota
 	errorLevel   logLevel = iota
 	warningLevel logLevel = iota

@@ -13,19 +13,33 @@ type Configuration struct {
 	LogLevel logLevel
 }
 
-func GetConfiguration(filename string) (*Configuration, error) {
-	var configuration Configuration
+func LoadConfiguration(filename string) {
+	configuration.LogLevel = infoLevel
 	content, err := ioutil.ReadFile(filename)
 
 	if err != nil {
-		return nil, err
+		logFatal("Unable to read the configuration file \"%v\": %v", filename, err)
+		panic(err)
 	}
 
 	err = json.Unmarshal(content, &configuration)
 
 	if err != nil {
-		return nil, err
+		logFatal("Unable to parse the configuration file \"%v\": %v", filename, err)
+		panic(err)
 	}
 
-	return &configuration, err
+	if len(configuration.Database) == 0 {
+		logFatal("Database was not defined.")
+		panic("Database was not defined.")
+	}
+
+	if len(configuration.Password) == 0 {
+		logFatal("Password was not defined.")
+		panic("Password was not defined.")
+	}
+
+	if configuration.LogLevel == noLevel {
+		configuration.LogLevel = infoLevel
+	}
 }
