@@ -16,6 +16,8 @@ func getDataAsJson(rsp *http.Response) (*interface{}, error) {
 	jsonBody, err := ioutil.ReadAll(rsp.Body)
 
 	if err != nil {
+		logError("Error trying to transform the HTTP response to JSON object for %v , \nException: %v",
+			rsp.Request.URL.String(), err)
 		return nil, err
 	}
 
@@ -31,6 +33,8 @@ func getDataAsHtml(rsp *http.Response) (*interface{}, error) {
 	document, err := goquery.NewDocumentFromResponse(rsp)
 
 	if err != nil {
+		logError("Error trying to transform the HTTP response to JSON object for %v , \nException: %v",
+			rsp.Request.URL.String(), err)
 		return nil, err
 	}
 
@@ -51,5 +55,6 @@ func getHttpBodyResponse(url string, headers map[string]string) (*http.Response,
 		}
 	}
 
+	logDebug("Request made: %q", req)
 	return client.Do(req)
 }

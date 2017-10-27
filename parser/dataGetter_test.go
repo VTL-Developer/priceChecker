@@ -36,6 +36,16 @@ func Test_getDataAsJson_With_PriceHistoryJson(t *testing.T) {
 	}
 }
 
+func Test_getDataAsJson_With_BadJSON(t *testing.T) {
+	var rsp http.Response
+	rsp.Body = &MockClosingBuffer{bytes.NewBufferString(`{"price":"54.05", "datetime":"2017-10-24T22:15:21.000000Z"`)}
+	_, err := getDataAsJson(&rsp)
+
+	if err == nil {
+		t.Errorf("Error should have been thrown")
+	}
+}
+
 func Test_getDataAsHtml(t *testing.T) {
 	var convertedDocument goquery.Document
 	s := httptest.NewServer(http.HandlerFunc(httpHandler))

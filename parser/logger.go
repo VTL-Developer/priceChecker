@@ -18,34 +18,38 @@ const (
 
 var logger = log.New(os.Stdout, "", log.LUTC|log.LstdFlags)
 
-func logFatal(log string) {
+func logFatal(unformatted string, data ...interface{}) {
 	if configuration.LogLevel >= fatalLevel {
-		logger.Print(formattedLog(fatalLevel, log))
+		logger.Print(formattedLog(fatalLevel, formatLogInput(unformatted, data...)))
 	}
 }
 
-func logError(log string) {
+func logError(unformatted string, data ...interface{}) {
 	if configuration.LogLevel >= errorLevel {
-		logger.Print(formattedLog(errorLevel, log))
+		logger.Print(formattedLog(errorLevel, formatLogInput(unformatted, data...)))
 	}
 }
 
-func logWarning(log string) {
+func logWarning(unformatted string, data ...interface{}) {
 	if configuration.LogLevel >= warningLevel {
-		logger.Print(formattedLog(warningLevel, log))
+		logger.Print(formattedLog(warningLevel, formatLogInput(unformatted, data...)))
 	}
 }
 
-func logInfo(log string) {
+func logInfo(unformatted string, data ...interface{}) {
 	if configuration.LogLevel >= infoLevel {
-		logger.Print(formattedLog(infoLevel, log))
+		logger.Print(formattedLog(infoLevel, formatLogInput(unformatted, data...)))
 	}
 }
 
-func logDebug(log string) {
+func logDebug(unformatted string, data ...interface{}) {
 	if configuration.LogLevel >= debugLevel {
-		logger.Print(formattedLog(debugLevel, log))
+		logger.Print(formattedLog(debugLevel, formatLogInput(unformatted, data...)))
 	}
+}
+
+func formatLogInput(unformatted string, data ...interface{}) string {
+	return fmt.Sprintf(unformatted, data...)
 }
 
 func formattedLog(level logLevel, log string) string {

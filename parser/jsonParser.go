@@ -11,6 +11,9 @@ func GetCost(content *interface{}, contentPath []interface{}) float64 {
 	converted := true
 	name := ""
 	index := -1
+
+	logDebug("GetCost function\nJSON body is: %v\nJSON path to check: %v", *content, contentPath)
+
 	for _, path := range contentPath {
 		index, converted = path.(int)
 
@@ -24,6 +27,7 @@ func GetCost(content *interface{}, contentPath []interface{}) float64 {
 		}
 
 		if !converted || !found {
+			logWarning("Was not able to find the cost from JSON.")
 			return -1.0
 		}
 	}
@@ -36,6 +40,7 @@ func GetCost(content *interface{}, contentPath []interface{}) float64 {
 		cost = -1.0
 	}
 
+	logInfo("Found the cost: %v", cost)
 	return cost
 }
 
