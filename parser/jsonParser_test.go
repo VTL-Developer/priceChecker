@@ -5,28 +5,28 @@ import (
 	"testing"
 )
 
-func TestGetCost_EmptyCase(t *testing.T) {
-	testGetCost(t, []byte(`{}`), []interface{}{}, -1.0)
+func TestGetCostJson_EmptyCase(t *testing.T) {
+	testGetCostJson(t, []byte(`{}`), []interface{}{}, -1.0)
 }
 
-func TestGetCost_EmptyCaseWithPath(t *testing.T) {
-	testGetCost(t, []byte(`{}`), []interface{}{"Somewhere"}, -1.0)
+func TestGetCostJson_EmptyCaseWithPath(t *testing.T) {
+	testGetCostJson(t, []byte(`{}`), []interface{}{"Somewhere"}, -1.0)
 }
 
-func TestGetCost_SimpleCase(t *testing.T) {
-	testGetCost(t, []byte(`{"cost": 123.45}`), []interface{}{"cost"}, 123.45)
+func TestGetCostJson_SimpleCase(t *testing.T) {
+	testGetCostJson(t, []byte(`{"cost": 123.45}`), []interface{}{"cost"}, 123.45)
 }
 
-func TestGetCost_SimpleCaseWithMiss(t *testing.T) {
-	testGetCost(t, []byte(`{"cost": 123.45}`), []interface{}{"price"}, -1)
+func TestGetCostJson_SimpleCaseWithMiss(t *testing.T) {
+	testGetCostJson(t, []byte(`{"cost": 123.45}`), []interface{}{"price"}, -1)
 }
 
-func TestGetCost_SimpleCaseWithCaseSensitivityMiss(t *testing.T) {
-	testGetCost(t, []byte(`{"cost": 123.45}`), []interface{}{"Cost"}, -1)
+func TestGetCostJson_SimpleCaseWithCaseSensitivityMiss(t *testing.T) {
+	testGetCostJson(t, []byte(`{"cost": 123.45}`), []interface{}{"Cost"}, -1)
 }
 
-func TestGetCost_ComplexJsonObject(t *testing.T) {
-	testGetCost(t, []byte(`{
+func TestGetCostJson_ComplexJsonObject(t *testing.T) {
+	testGetCostJson(t, []byte(`{
 		"item": "name",
 		"detail": {
 			"item": {
@@ -38,8 +38,8 @@ func TestGetCost_ComplexJsonObject(t *testing.T) {
 	}`), []interface{}{"detail", "item", "cost"}, 123.45)
 }
 
-func TestGetCost_ComplexJsonObjectWithIntsAsNamedPaths(t *testing.T) {
-	testGetCost(t, []byte(`{
+func TestGetCostJson_ComplexJsonObjectWithIntsAsNamedPaths(t *testing.T) {
+	testGetCostJson(t, []byte(`{
 		"item": "name",
 		"detail": {
 			"52": {
@@ -51,8 +51,8 @@ func TestGetCost_ComplexJsonObjectWithIntsAsNamedPaths(t *testing.T) {
 	}`), []interface{}{"detail", "52", "cost"}, 123.45)
 }
 
-func TestGetCost_ComplexJsonObjectWithIntsAsNamedPathsAndArrays(t *testing.T) {
-	testGetCost(t, []byte(`{
+func TestGetCostJson_ComplexJsonObjectWithIntsAsNamedPathsAndArrays(t *testing.T) {
+	testGetCostJson(t, []byte(`{
 		"item":"name",
 		"detail": [{
 			"52": {
@@ -64,7 +64,7 @@ func TestGetCost_ComplexJsonObjectWithIntsAsNamedPathsAndArrays(t *testing.T) {
 	}`), []interface{}{"detail", 0, "52", "cost", 2}, 123.45)
 }
 
-func testGetCost(t *testing.T, jsonBody []byte, path []interface{}, expected float64) {
+func testGetCostJson(t *testing.T, jsonBody []byte, path []interface{}, expected float64) {
 	var jsonObj interface{}
 	e := json.Unmarshal(jsonBody, &jsonObj)
 
@@ -73,8 +73,8 @@ func testGetCost(t *testing.T, jsonBody []byte, path []interface{}, expected flo
 		return
 	}
 
-	got := GetCost(&jsonObj, path)
+	got := GetCostJson(&jsonObj, path)
 	if got != expected {
-		t.Errorf("GetCost returned %q, should be %q", got, expected)
+		t.Errorf("GetCostJson returned %q, should be %q", got, expected)
 	}
 }

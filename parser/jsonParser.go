@@ -1,10 +1,6 @@
 package main
 
-import (
-//"encoding/json"
-)
-
-func GetCost(content *interface{}, contentPath []interface{}) float64 {
+func GetCostJson(content *interface{}, contentPath []interface{}) float64 {
 	jsonObj := content
 	cost := -1.0
 	found := true
@@ -64,13 +60,4 @@ func getJsonObjectByIndex(content *interface{}, index int) (*interface{}, bool) 
 
 	innerObj, ok := jsonObj[index].(interface{})
 	return &innerObj, ok
-}
-
-func main() {
-	// content := make(map[string] interface{})
-	// e := json.Unmarshal(data, &content)
-
-	// if e != nil {
-	// 	panic(e)
-	// }
 }
