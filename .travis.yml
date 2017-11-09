@@ -5,4 +5,4 @@ go:
     - 1.9
 
 before_install:
-    - go get -t -u -v $(go list -f '{{ join .Imports "\n" }}' | grep -iP "github.com")
+    - go get -t -u -v $(go list -f '{{ join .Imports "\n" }}' ./... | grep -iP "github.com")
