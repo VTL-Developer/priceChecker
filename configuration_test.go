@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -57,7 +58,7 @@ func TestGetConfiguration_Suite(t *testing.T) {
 		fileName     string
 		errorMessage string
 	}{
-		{"Configuration File Not Found", "./test/no_configuration.json", "open ./test/no_configuration.json: The system cannot find the file specified."},
+		{"Configuration File Not Found", "./test/no_configuration.json", "open ./test/no_configuration.json:"},
 		{"Malformed Configuration File", "./test/malformed_configuration.json", "invalid character '}' looking for beginning of object key string"},
 		{"No Database in configuration", "./test/no_database_configuration.json", "Database was not defined."},
 		{"No password in configuration", "./test/no_password_configuration.json", "Password was not defined."},
@@ -89,7 +90,7 @@ func assertPanic(t *testing.T, errorMessage string) {
 		actualErrorMessage = err.Error()
 	}
 
-	if actualErrorMessage != errorMessage {
-		t.Errorf("The error match was not as expected.\n  Actual: %v\nExpected: %v", actualErrorMessage, errorMessage)
+	if !strings.Contains(actualErrorMessage, errorMessage) {
+		t.Errorf("The error match does not contain the following\nExpected: %v\n  Actual: %v", errorMessage, actualErrorMessage)
 	}
 }
