@@ -6,7 +6,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"net/http/httptest"
-	"path"
 	"testing"
 )
 
@@ -156,7 +155,7 @@ func Test_getHttpBodyResponse_WithHeaders(t *testing.T) {
 }
 
 func httpHandler(rw http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(rw, `<html><head></head><body><span class="check">hello</span></body></html>`, path.Base(r.URL.Path))
+	fmt.Fprintf(rw, `<html><head></head><body><span class="check">hello</span></body></html>`)
 }
 
 type MockClosingBuffer struct {

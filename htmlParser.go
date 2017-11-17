@@ -11,7 +11,7 @@ func GetCostHtml(content *interface{}, contentPath []interface{}) float64 {
 	document, converted := (*content).(goquery.Document)
 
 	if !converted {
-		logError("Input was not a goquery document object.")
+		logError("Input was not a goquery document object: %q", content)
 		return -1.0
 	}
 

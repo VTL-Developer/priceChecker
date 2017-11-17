@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 type SiteHistory struct {
 	Last24HourPriceHistory []PriceHistory
 	DayByDayPriceHistory   []PriceHistory
@@ -25,13 +21,20 @@ func (s *SiteHistory) TrimLast24HoursToN(n int) {
 	}
 }
 
+func (s SiteHistory) GetLatestPrice() float64 {
+	length := len(s.Last24HourPriceHistory)
+	if length > 0 {
+		return s.Last24HourPriceHistory[length-1].Price
+	} else {
+		return -1
+	}
+}
+
 func addPriceToPriceHistory(price float64, priceHistorySlice []PriceHistory) []PriceHistory {
 	if price > 0 {
 		priceHistorySlice = (append(
 			priceHistorySlice,
-			PriceHistory{
-				Price:    price,
-				Datetime: time.Now().UTC()}))
+			MakePriceEntry(price)))
 	}
 
 	return priceHistorySlice

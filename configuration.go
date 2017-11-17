@@ -45,11 +45,3 @@ func LoadConfiguration(filename string) {
 
 	configuration.LogLevel = logLevel(min(int(configuration.LogLevel), int(debugLevel)))
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
-}
