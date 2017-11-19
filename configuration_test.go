@@ -67,9 +67,8 @@ func assertPanic(t *testing.T, errorMessage string) {
 	}
 
 	actualErrorMessage, _ := r.(string)
-	err, ok := r.(error)
 
-	if ok {
+	if err, ok := r.(error); ok {
 		actualErrorMessage = err.Error()
 	}
 

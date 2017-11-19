@@ -16,15 +16,12 @@ func Test_getDataAsJson_With_PriceHistoryJson(t *testing.T) {
 
 	AssertNotError(err, t)
 
-	convertedJsonBody, ok := (*jsonBody).(map[string]interface{})
-
-	if !ok {
+	if convertedJsonBody, ok := (*jsonBody).(map[string]interface{}); !ok {
 		t.Errorf("Conversion was not successful.\nOriginal: %q\nConverted: %q", jsonBody, convertedJsonBody)
-		return
+	} else {
+		AssertEqual(convertedJsonBody["price"], "54.05", t)
+		AssertEqual(convertedJsonBody["datetime"], "2017-10-24T22:15:21.000000Z", t)
 	}
-
-	AssertEqual(convertedJsonBody["price"], "54.05", t)
-	AssertEqual(convertedJsonBody["datetime"], "2017-10-24T22:15:21.000000Z", t)
 }
 
 func Test_getDataAsJson_With_BadJSON(t *testing.T) {
@@ -36,29 +33,26 @@ func Test_getDataAsJson_With_BadJSON(t *testing.T) {
 }
 
 func Test_getDataAsHtml(t *testing.T) {
-	var convertedDocument goquery.Document
 	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	defer CloseServer(s)
 	rsp, _ := http.Get(s.URL)
 
 	document, err := getDataAsHtml(rsp)
 
 	AssertNotError(err, t)
 
-	convertedDocument, ok := (*document).(goquery.Document)
-
-	if !ok {
+	if convertedDocument, ok := (*document).(goquery.Document); !ok {
 		t.Errorf("Conversion failed.\nOriginal: %q\nConverted: %q", document, convertedDocument)
-		return
+	} else {
+		span := convertedDocument.Find("span")
+		AssertEqual(span.Text(), "hello", t)
+		AssertTrue(span.HasClass("check"), t)
 	}
-
-	span := convertedDocument.Find("span")
-
-	AssertEqual(span.Text(), "hello", t)
-	AssertTrue(span.HasClass("check"), t)
 }
 
 func Test_getHttpBodyResponse_NilHeaders(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	defer CloseServer(s)
 	rsp, err := getHttpBodyResponse(s.URL, nil)
 
 	if rsp != nil {
@@ -66,7 +60,6 @@ func Test_getHttpBodyResponse_NilHeaders(t *testing.T) {
 	}
 
 	AssertNotError(err, t)
-
 	AssertEqual(rsp.Request.URL.String(), s.URL, t)
 	AssertEqual(len(rsp.Request.Header), 0, t)
 }
@@ -74,6 +67,7 @@ func Test_getHttpBodyResponse_NilHeaders(t *testing.T) {
 func Test_getHttpBodyResponse_EmptyHeaders(t *testing.T) {
 	headers := make(map[string]string)
 	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	defer CloseServer(s)
 	rsp, err := getHttpBodyResponse(s.URL, headers)
 
 	if rsp != nil {
@@ -92,6 +86,7 @@ func Test_getHttpBodyResponse_WithHeaders(t *testing.T) {
 	headers["another"] = "item"
 
 	s := httptest.NewServer(http.HandlerFunc(httpHandler))
+	defer CloseServer(s)
 	rsp, err := getHttpBodyResponse(s.URL, headers)
 
 	if rsp != nil {

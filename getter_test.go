@@ -10,7 +10,8 @@ import (
 var siteToUrl map[string]string
 
 func Test_getAndUpdateData_basicHtmlCase(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 	itemData := makeBasicItemDataForHtmlParsing()
 	getAndUpdateData(&itemData)
 
@@ -18,7 +19,8 @@ func Test_getAndUpdateData_basicHtmlCase(t *testing.T) {
 }
 
 func Test_getAndUpdateData_basicJsonCase(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 	itemData := makeBasicItemDataForJsonParsing()
 	getAndUpdateData(&itemData)
 
@@ -26,7 +28,8 @@ func Test_getAndUpdateData_basicJsonCase(t *testing.T) {
 }
 
 func Test_getAndUpdateData_hasMultipleSources(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 	itemData := makeBasicItemDataForMultipleParsing()
 	getAndUpdateData(&itemData)
 
@@ -37,7 +40,8 @@ func Test_getAndUpdateData_hasMultipleSources(t *testing.T) {
 }
 
 func Test_GetAndUpdateDataForItems_With1Goroutines(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 
 	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
 	itemsToUpdate := []*ItemData{}
@@ -57,7 +61,8 @@ func Test_GetAndUpdateDataForItems_With1Goroutines(t *testing.T) {
 }
 
 func Test_GetAndUpdateDataForItems_With2Goroutines(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 
 	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
 	itemsToUpdate := []*ItemData{}
@@ -68,6 +73,9 @@ func Test_GetAndUpdateDataForItems_With2Goroutines(t *testing.T) {
 
 	GetAndUpdateDataForItems(itemsToUpdate, 2)
 
+	logInfo("now: %v", itemsToUpdate[0])
+	logInfo("now: %v", itemsToUpdate[1])
+	logInfo("now: %v", itemsToUpdate[2])
 	AssertEqual(itemsToUpdate[0].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
 	AssertEqual(itemsToUpdate[1].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
 	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
@@ -77,7 +85,8 @@ func Test_GetAndUpdateDataForItems_With2Goroutines(t *testing.T) {
 }
 
 func Test_GetAndUpdateDataForItems_With3Goroutines(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 
 	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
 	itemsToUpdate := []*ItemData{}
@@ -97,7 +106,8 @@ func Test_GetAndUpdateDataForItems_With3Goroutines(t *testing.T) {
 }
 
 func Test_GetAndUpdateDataForItems_With4Goroutines(t *testing.T) {
-	setup_server()
+	siteToServer := setupServer()
+	defer tearDownServer(siteToServer)
 
 	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
 	itemsToUpdate := []*ItemData{}
@@ -116,25 +126,41 @@ func Test_GetAndUpdateDataForItems_With4Goroutines(t *testing.T) {
 	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
 }
 
-func setup_server() {
+func setupServer() map[string]*httptest.Server {
 	siteToUrl = make(map[string]string)
+	siteToServer := make(map[string]*httptest.Server)
+
 	s := httptest.NewServer(http.HandlerFunc(htmlHandler1))
 	siteToUrl["htmlHandler1"] = s.URL
+	siteToServer["htmlHandler1"] = s
 
 	s = httptest.NewServer(http.HandlerFunc(jsonHandler1))
 	siteToUrl["jsonHandler1"] = s.URL
+	siteToServer["jsonHandler1"] = s
 
 	s = httptest.NewServer(http.HandlerFunc(htmlHandler2))
 	siteToUrl["htmlHandler2"] = s.URL
+	siteToServer["htmlHandler2"] = s
 
 	s = httptest.NewServer(http.HandlerFunc(jsonHandler2))
 	siteToUrl["jsonHandler2"] = s.URL
+	siteToServer["jsonHandler2"] = s
 
 	s = httptest.NewServer(http.HandlerFunc(htmlHandler3))
 	siteToUrl["htmlHandler3"] = s.URL
+	siteToServer["htmlHandler3"] = s
 
 	s = httptest.NewServer(http.HandlerFunc(jsonHandler3))
 	siteToUrl["jsonHandler3"] = s.URL
+	siteToServer["jsonHandler3"] = s
+
+	return siteToServer
+}
+
+func tearDownServer(siteToServer map[string]*httptest.Server) {
+	for _, server := range siteToServer {
+		CloseServer(server)
+	}
 }
 
 func htmlHandler1(rw http.ResponseWriter, r *http.Request) {

@@ -75,8 +75,7 @@ func getAndUpdateData(item *ItemData) {
 			continue
 		}
 
-		price := dataParser(content, siteData.Path)
-		if price > 0 {
+		if price := dataParser(content, siteData.Path); price > 0 {
 			if history, ok := item.SiteHistory[siteData.Name]; ok {
 				history.AddPriceToLast24HourHistory(price)
 				logInfo("Found the cost of %v from %v for %v", price, siteData.Name, item.Name)

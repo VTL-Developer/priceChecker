@@ -11,8 +11,8 @@ import (
 var client = http.Client{Timeout: 10 * time.Second}
 
 func getDataAsJson(rsp *http.Response) (*interface{}, error) {
-	defer rsp.Body.Close()
 	var target interface{}
+	defer closeRsp(rsp)
 	jsonBody, err := ioutil.ReadAll(rsp.Body)
 
 	if err != nil {
@@ -33,7 +33,7 @@ func getDataAsJson(rsp *http.Response) (*interface{}, error) {
 func getDataAsHtml(rsp *http.Response) (*interface{}, error) {
 	var convertedDocument interface{}
 	var err error
-	defer rsp.Body.Close()
+	defer closeRsp(rsp)
 
 	document, err := goquery.NewDocumentFromResponse(rsp)
 
@@ -62,4 +62,18 @@ func getHttpBodyResponse(url string, headers map[string]string) (*http.Response,
 
 	logDebug("Request made: %q", req)
 	return client.Do(req)
+}
+
+func closeRsp(rsp *http.Response) {
+	if rsp.Request != nil {
+		logInfo("Closing the connection for %v", rsp.Request.URL)
+	}
+
+	if err := rsp.Body.Close(); err != nil {
+		logError("Error closing response: %v", err)
+	}
+
+	if rsp.Request != nil {
+		logInfo("Closed the connection for %v", rsp.Request.URL)
+	}
 }

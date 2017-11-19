@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http/httptest"
 	"runtime/debug"
 	"strings"
 	"testing"
@@ -51,4 +52,8 @@ func AssertStringContains(actual, expected string, t *testing.T) {
 
 func getDebugData() string {
 	return fmt.Sprintf("Stack: %v", string(debug.Stack()))
+}
+
+func CloseServer(s *httptest.Server) {
+	s.Close()
 }
