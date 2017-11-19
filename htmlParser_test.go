@@ -26,15 +26,10 @@ func testGetCostHtml(t *testing.T, htmlBody []byte, path []interface{}, expected
 	r := bytes.NewReader(htmlBody)
 	document, err := goquery.NewDocumentFromReader(r)
 
-	if err != nil {
-		t.Errorf("Error thrown: %v", err)
-		return
-	}
+	AssertNotError(err, t)
 
 	var interfaceObj interface{} = *document
 
 	got := GetCostHtml(&interfaceObj, path)
-	if got != expected {
-		t.Errorf("GetCost returned %q, should be %q", got, expected)
-	}
+	AssertEqual(got, expected, t)
 }

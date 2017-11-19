@@ -14,10 +14,7 @@ func Test_getDataAsJson_With_PriceHistoryJson(t *testing.T) {
 	rsp.Body = &MockClosingBuffer{bytes.NewBufferString(`{"price":"54.05", "datetime":"2017-10-24T22:15:21.000000Z"}`)}
 	jsonBody, err := getDataAsJson(&rsp)
 
-	if err != nil {
-		t.Errorf("Error occured: %v", err)
-		return
-	}
+	AssertNotError(err, t)
 
 	convertedJsonBody, ok := (*jsonBody).(map[string]interface{})
 
@@ -26,13 +23,8 @@ func Test_getDataAsJson_With_PriceHistoryJson(t *testing.T) {
 		return
 	}
 
-	if convertedJsonBody["price"] != "54.05" {
-		t.Errorf("JSON body price is %q, should be %q", convertedJsonBody["price"], "54.05")
-	}
-
-	if convertedJsonBody["datetime"] != "2017-10-24T22:15:21.000000Z" {
-		t.Errorf("JSON body datetime is %q, should be %q", convertedJsonBody["datetime"], "2017-10-24T22:15:21.000000Z")
-	}
+	AssertEqual(convertedJsonBody["price"], "54.05", t)
+	AssertEqual(convertedJsonBody["datetime"], "2017-10-24T22:15:21.000000Z", t)
 }
 
 func Test_getDataAsJson_With_BadJSON(t *testing.T) {
@@ -40,9 +32,7 @@ func Test_getDataAsJson_With_BadJSON(t *testing.T) {
 	rsp.Body = &MockClosingBuffer{bytes.NewBufferString(`{"price":"54.05", "datetime":"2017-10-24T22:15:21.000000Z"`)}
 	_, err := getDataAsJson(&rsp)
 
-	if err == nil {
-		t.Errorf("Error should have been thrown")
-	}
+	AssertError(err, t)
 }
 
 func Test_getDataAsHtml(t *testing.T) {
@@ -52,10 +42,7 @@ func Test_getDataAsHtml(t *testing.T) {
 
 	document, err := getDataAsHtml(rsp)
 
-	if err != nil {
-		t.Errorf("Error occured: %v", err)
-		return
-	}
+	AssertNotError(err, t)
 
 	convertedDocument, ok := (*document).(goquery.Document)
 
@@ -66,13 +53,8 @@ func Test_getDataAsHtml(t *testing.T) {
 
 	span := convertedDocument.Find("span")
 
-	if span.Text() != "hello" {
-		t.Errorf("Span text found is %q, should be %q", span.Text(), "hello")
-	}
-
-	if !span.HasClass("check") {
-		t.Error("Span does not have class \"check\"")
-	}
+	AssertEqual(span.Text(), "hello", t)
+	AssertTrue(span.HasClass("check"), t)
 }
 
 func Test_getHttpBodyResponse_NilHeaders(t *testing.T) {
@@ -83,18 +65,10 @@ func Test_getHttpBodyResponse_NilHeaders(t *testing.T) {
 		defer rsp.Body.Close()
 	}
 
-	if err != nil {
-		t.Errorf("Error occured: %v", err)
-		return
-	}
+	AssertNotError(err, t)
 
-	if rsp.Request.URL.String() != s.URL {
-		t.Errorf("Request URL was %q, should be %q", rsp.Request.URL, s.URL)
-	}
-
-	if len(rsp.Request.Header) != 0 {
-		t.Errorf("Request heaer should be empty, but has %q", rsp.Request.Header)
-	}
+	AssertEqual(rsp.Request.URL.String(), s.URL, t)
+	AssertEqual(len(rsp.Request.Header), 0, t)
 }
 
 func Test_getHttpBodyResponse_EmptyHeaders(t *testing.T) {
@@ -106,18 +80,10 @@ func Test_getHttpBodyResponse_EmptyHeaders(t *testing.T) {
 		defer rsp.Body.Close()
 	}
 
-	if err != nil {
-		t.Errorf("Error occured: %v", err)
-		return
-	}
+	AssertNotError(err, t)
 
-	if rsp.Request.URL.String() != s.URL {
-		t.Errorf("Request URL was %q, should be %q", rsp.Request.URL, s.URL)
-	}
-
-	if len(rsp.Request.Header) != 0 {
-		t.Errorf("Request heaer should be empty, but has %q", rsp.Request.Header)
-	}
+	AssertEqual(rsp.Request.URL.String(), s.URL, t)
+	AssertEqual(len(rsp.Request.Header), 0, t)
 }
 
 func Test_getHttpBodyResponse_WithHeaders(t *testing.T) {
@@ -132,26 +98,12 @@ func Test_getHttpBodyResponse_WithHeaders(t *testing.T) {
 		defer rsp.Body.Close()
 	}
 
-	if err != nil {
-		t.Errorf("Error occured: %v", err)
-		return
-	}
+	AssertNotError(err, t)
 
-	if rsp.Request.URL.String() != s.URL {
-		t.Errorf("Request URL was %q, should be %q", rsp.Request.URL, s.URL)
-	}
-
-	if len(rsp.Request.Header) < 2 {
-		t.Errorf("Request heaer should have two items, but has %q item(s) with: %q", len(rsp.Request.Header), rsp.Request.Header)
-	}
-
-	if rsp.Request.Header.Get("hello") != "world" {
-		t.Errorf("Request headers should have 'hello: world' but has 'hello: %v'", rsp.Request.Header.Get("hello"))
-	}
-
-	if rsp.Request.Header.Get("another") != "item" {
-		t.Errorf("Request headers should have 'another: item' but has 'another: %v'", rsp.Request.Header.Get("another"))
-	}
+	AssertEqual(rsp.Request.URL.String(), s.URL, t)
+	AssertTrue(len(rsp.Request.Header) >= 2, t)
+	AssertEqual(rsp.Request.Header.Get("hello"), "world", t)
+	AssertEqual(rsp.Request.Header.Get("another"), "item", t)
 }
 
 func httpHandler(rw http.ResponseWriter, r *http.Request) {

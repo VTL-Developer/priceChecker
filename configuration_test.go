@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strings"
 	"testing"
 )
 
@@ -20,17 +19,9 @@ func TestGetConfiguration_BasicRead(t *testing.T) {
 
 	LoadConfiguration("./test/test_configuration.json")
 
-	if configuration.Database != "testDatabase1" {
-		t.Errorf("GetCost returned %q, should be \"testDatabase1\"", configuration.Database)
-	}
-
-	if configuration.Password != "testPassword1" {
-		t.Errorf("GetCost returned %q, should be \"testPassword1\"", configuration.Password)
-	}
-
-	if configuration.LogLevel != infoLevel {
-		t.Errorf("Configuration log level should be info (%v), but it is set to %v", infoLevel, configuration.LogLevel)
-	}
+	AssertEqual(configuration.Database, "testDatabase1", t)
+	AssertEqual(configuration.Password, "testPassword1", t)
+	AssertEqual(configuration.LogLevel, infoLevel, t)
 }
 
 func TestGetConfiguration_ConfigurationWithLogLevel(t *testing.T) {
@@ -39,17 +30,9 @@ func TestGetConfiguration_ConfigurationWithLogLevel(t *testing.T) {
 
 	LoadConfiguration("./test/test_configuration_with_log_level.json")
 
-	if configuration.Database != "testDatabase2" {
-		t.Errorf("GetCost returned %q, should be \"testDatabase2\"", configuration.Database)
-	}
-
-	if configuration.Password != "testPassword2" {
-		t.Errorf("GetCost returned %q, should be \"testPassword2\"", configuration.Password)
-	}
-
-	if configuration.LogLevel != errorLevel {
-		t.Errorf("Configuration log level should be %v (info), but it is set to %v", errorLevel, configuration.LogLevel)
-	}
+	AssertEqual(configuration.Database, "testDatabase2", t)
+	AssertEqual(configuration.Password, "testPassword2", t)
+	AssertEqual(configuration.LogLevel, errorLevel, t)
 }
 
 func TestGetConfiguration_Suite(t *testing.T) {
@@ -90,7 +73,5 @@ func assertPanic(t *testing.T, errorMessage string) {
 		actualErrorMessage = err.Error()
 	}
 
-	if !strings.Contains(actualErrorMessage, errorMessage) {
-		t.Errorf("The error match does not contain the following\nExpected: %v\n  Actual: %v", errorMessage, actualErrorMessage)
-	}
+	AssertStringContains(actualErrorMessage, errorMessage, t)
 }
