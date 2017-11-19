@@ -10,8 +10,8 @@ import (
 var siteToUrl map[string]string
 
 func Test_getAndUpdateData_basicHtmlCase(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
+	siteToServer := setupServers()
+	defer tearDownServers(siteToServer)
 	itemData := makeBasicItemDataForHtmlParsing()
 	getAndUpdateData(&itemData)
 
@@ -19,8 +19,8 @@ func Test_getAndUpdateData_basicHtmlCase(t *testing.T) {
 }
 
 func Test_getAndUpdateData_basicJsonCase(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
+	siteToServer := setupServers()
+	defer tearDownServers(siteToServer)
 	itemData := makeBasicItemDataForJsonParsing()
 	getAndUpdateData(&itemData)
 
@@ -28,105 +28,44 @@ func Test_getAndUpdateData_basicJsonCase(t *testing.T) {
 }
 
 func Test_getAndUpdateData_hasMultipleSources(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
+	siteToServer := setupServers()
+	defer tearDownServers(siteToServer)
 	itemData := makeBasicItemDataForMultipleParsing()
 	getAndUpdateData(&itemData)
 
-	AssertEqual(itemData.SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
 	AssertEqual(itemData.SiteHistory["htmlHandler2"].GetLatestPrice(), -1.0, t)
-	AssertEqual(itemData.SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
+	AssertEqual(itemData.SiteHistory["htmlHandler3"].GetLatestPrice(), 105.00, t)
 	AssertEqual(itemData.SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
+	AssertEqual(itemData.SiteHistory["jsonHandler3"].GetLatestPrice(), 45.00, t)
 }
 
-func Test_GetAndUpdateDataForItems_With1Goroutines(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
+func Test_GetAndUpdateDataForItems_WithMultipleGoroutines(t *testing.T) {
+	cases := []string{"with 1 goroutine", "with 2 goroutines", "with 3 goroutines", "with 4 goroutines", "with 5 goroutines"}
 
-	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
-	itemsToUpdate := []*ItemData{}
+	for index, name := range cases {
+		t.Run(name, func(t *testing.T) {
+			siteToServer := setupServers()
+			defer tearDownServers(siteToServer)
 
-	for _, item := range items {
-		itemsToUpdate = append(itemsToUpdate, &item)
+			items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
+			itemsToUpdate := []*ItemData{}
+
+			for i := range items {
+				itemsToUpdate = append(itemsToUpdate, &items[i])
+			}
+
+			GetAndUpdateDataForItems(itemsToUpdate, index+1)
+			AssertEqual(itemsToUpdate[0].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
+			AssertEqual(itemsToUpdate[1].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
+			AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler2"].GetLatestPrice(), -1.0, t)
+			AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler3"].GetLatestPrice(), 105.00, t)
+			AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
+			AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler3"].GetLatestPrice(), 45.00, t)
+		})
 	}
-
-	GetAndUpdateDataForItems(itemsToUpdate, 1)
-
-	AssertEqual(itemsToUpdate[0].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[1].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler2"].GetLatestPrice(), -1.0, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
 }
 
-func Test_GetAndUpdateDataForItems_With2Goroutines(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
-
-	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
-	itemsToUpdate := []*ItemData{}
-
-	for _, item := range items {
-		itemsToUpdate = append(itemsToUpdate, &item)
-	}
-
-	GetAndUpdateDataForItems(itemsToUpdate, 2)
-
-	logInfo("now: %v", itemsToUpdate[0])
-	logInfo("now: %v", itemsToUpdate[1])
-	logInfo("now: %v", itemsToUpdate[2])
-	AssertEqual(itemsToUpdate[0].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[1].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler2"].GetLatestPrice(), -1.0, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
-}
-
-func Test_GetAndUpdateDataForItems_With3Goroutines(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
-
-	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
-	itemsToUpdate := []*ItemData{}
-
-	for _, item := range items {
-		itemsToUpdate = append(itemsToUpdate, &item)
-	}
-
-	GetAndUpdateDataForItems(itemsToUpdate, 3)
-
-	AssertEqual(itemsToUpdate[0].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[1].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler2"].GetLatestPrice(), -1.0, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
-}
-
-func Test_GetAndUpdateDataForItems_With4Goroutines(t *testing.T) {
-	siteToServer := setupServer()
-	defer tearDownServer(siteToServer)
-
-	items := []ItemData{makeBasicItemDataForHtmlParsing(), makeBasicItemDataForJsonParsing(), makeBasicItemDataForMultipleParsing()}
-	itemsToUpdate := []*ItemData{}
-
-	for _, item := range items {
-		itemsToUpdate = append(itemsToUpdate, &item)
-	}
-
-	GetAndUpdateDataForItems(itemsToUpdate, 4)
-
-	AssertEqual(itemsToUpdate[0].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[1].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler1"].GetLatestPrice(), 150.00, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["htmlHandler2"].GetLatestPrice(), -1.0, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler1"].GetLatestPrice(), 123.45, t)
-	AssertEqual(itemsToUpdate[2].SiteHistory["jsonHandler2"].GetLatestPrice(), -1.0, t)
-}
-
-func setupServer() map[string]*httptest.Server {
+func setupServers() map[string]*httptest.Server {
 	siteToUrl = make(map[string]string)
 	siteToServer := make(map[string]*httptest.Server)
 
@@ -157,7 +96,7 @@ func setupServer() map[string]*httptest.Server {
 	return siteToServer
 }
 
-func tearDownServer(siteToServer map[string]*httptest.Server) {
+func tearDownServers(siteToServer map[string]*httptest.Server) {
 	for _, server := range siteToServer {
 		CloseServer(server)
 	}
@@ -210,7 +149,7 @@ func makeBasicItemDataForHtmlParsing() ItemData {
 func makeBasicItemDataForJsonParsing() ItemData {
 	itemSiteData := make([]ItemSiteData, 0)
 	itemSiteData = append(itemSiteData, ItemSiteData{
-		SiteId:     1,
+		SiteId:     2,
 		Name:       "jsonHandler1",
 		ParserType: jsonParser,
 		Path:       []interface{}{"price"},
@@ -218,7 +157,7 @@ func makeBasicItemDataForJsonParsing() ItemData {
 
 	itemData := ItemData{
 		Name:        "Box",
-		ItemId:      1,
+		ItemId:      2,
 		SiteData:    itemSiteData,
 		SiteHistory: make(map[string]*SiteHistory)}
 
@@ -229,44 +168,45 @@ func makeBasicItemDataForJsonParsing() ItemData {
 
 func makeBasicItemDataForMultipleParsing() ItemData {
 	itemSiteData := make([]ItemSiteData, 0)
-	itemSiteData = append(itemSiteData, ItemSiteData{
-		SiteId:     1,
-		Name:       "htmlHandler1",
-		ParserType: htmlParser,
-		Path:       []interface{}{".check"},
-		Url:        siteToUrl["htmlHandler1"]})
 
 	itemSiteData = append(itemSiteData, ItemSiteData{
-		SiteId:     2,
+		SiteId:     3,
 		Name:       "htmlHandler2",
 		ParserType: htmlParser,
 		Path:       []interface{}{".check1"},
 		Url:        siteToUrl["htmlHandler2"]})
 
 	itemSiteData = append(itemSiteData, ItemSiteData{
-		SiteId:     3,
-		Name:       "jsonHandler1",
-		ParserType: jsonParser,
-		Path:       []interface{}{"price"},
-		Url:        siteToUrl["jsonHandler1"]})
+		SiteId:     4,
+		Name:       "htmlHandler3",
+		ParserType: htmlParser,
+		Path:       []interface{}{".check"},
+		Url:        siteToUrl["htmlHandler3"]})
 
 	itemSiteData = append(itemSiteData, ItemSiteData{
-		SiteId:     4,
+		SiteId:     5,
 		Name:       "jsonHandler2",
 		ParserType: jsonParser,
 		Path:       []interface{}{".check"},
 		Url:        siteToUrl["jsonHandler2"]})
 
+	itemSiteData = append(itemSiteData, ItemSiteData{
+		SiteId:     6,
+		Name:       "jsonHandler3",
+		ParserType: jsonParser,
+		Path:       []interface{}{"price"},
+		Url:        siteToUrl["jsonHandler3"]})
+
 	itemData := ItemData{
 		Name:        "Box",
-		ItemId:      1,
+		ItemId:      3,
 		SiteData:    itemSiteData,
 		SiteHistory: make(map[string]*SiteHistory)}
 
-	itemData.SiteHistory["htmlHandler1"] = &SiteHistory{}
 	itemData.SiteHistory["htmlHandler2"] = &SiteHistory{}
-	itemData.SiteHistory["jsonHandler1"] = &SiteHistory{}
+	itemData.SiteHistory["htmlHandler3"] = &SiteHistory{}
 	itemData.SiteHistory["jsonHandler2"] = &SiteHistory{}
+	itemData.SiteHistory["jsonHandler3"] = &SiteHistory{}
 
 	return itemData
 }
