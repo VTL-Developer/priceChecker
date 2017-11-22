@@ -2,10 +2,14 @@ package main
 
 import (
 	"github.com/PuerkitoBio/goquery"
+	"net/http"
 	"strconv"
 )
 
-func GetCostHtml(content *interface{}, contentPath []interface{}) float64 {
+type HtmlParser struct {
+}
+
+func (h HtmlParser) GetCost(content *interface{}, contentPath []interface{}) float64 {
 	var queryPath string
 
 	document, converted := (*content).(goquery.Document)
@@ -40,4 +44,21 @@ func GetCostHtml(content *interface{}, contentPath []interface{}) float64 {
 
 	logInfo("Found the cost: %v", cost)
 	return cost
+}
+
+func (h HtmlParser) GetData(rsp *http.Response) (*interface{}, error) {
+	var convertedDocument interface{}
+	var err error
+	defer closeRsp(rsp)
+
+	document, err := goquery.NewDocumentFromResponse(rsp)
+
+	if err != nil {
+		logError("Error trying to transform the HTTP response to GoQuery object for %v , \nException: %v",
+			rsp.Request.URL.String(), err)
+		return nil, err
+	}
+
+	convertedDocument = *document
+	return &convertedDocument, nil
 }

@@ -1,6 +1,15 @@
 package main
 
-func GetCostJson(content *interface{}, contentPath []interface{}) float64 {
+import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+)
+
+type JsonParser struct {
+}
+
+func (j JsonParser) GetCost(content *interface{}, contentPath []interface{}) float64 {
 	jsonObj := content
 	cost := -1.0
 	found := true
@@ -35,6 +44,26 @@ func GetCostJson(content *interface{}, contentPath []interface{}) float64 {
 
 	logInfo("Found the cost: %v", cost)
 	return cost
+}
+
+func (j JsonParser) GetData(rsp *http.Response) (*interface{}, error) {
+	var target interface{}
+	defer closeRsp(rsp)
+	jsonBody, err := ioutil.ReadAll(rsp.Body)
+
+	if err != nil {
+		logError("Error trying to transform the HTTP response to JSON object for %v , \nException: %v",
+			rsp.Request.URL.String(), err)
+		return nil, err
+	}
+
+	err = json.Unmarshal(jsonBody, &target)
+	if err != nil {
+		logError("Issue transforming JSON: %v", err)
+		logDebug("Content was:\n%v", string(jsonBody))
+	}
+
+	return &target, err
 }
 
 func getJsonObjectByName(content *interface{}, name string) (*interface{}, bool) {

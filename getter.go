@@ -56,10 +56,9 @@ func getAndUpdateData(item *ItemData) {
 		var content *interface{}
 		logDebug(`Parsing "%v" for "%v"`, siteData.Name, item.Name)
 
-		dataTransformer := getDataTransformer(siteData.ParserType)
-		dataParser := getDataParser(siteData.ParserType)
+		parser := GetParser(siteData.ParserType)
 
-		if dataTransformer == nil || dataParser == nil {
+		if parser == nil {
 			logWarning(`Skip "%v" for "%v"`, siteData.Name, item.Name)
 		}
 
@@ -69,13 +68,13 @@ func getAndUpdateData(item *ItemData) {
 			continue
 		}
 
-		content, err = dataTransformer(body)
+		content, err = parser.GetData(body)
 		if err != nil {
 			logError("Issue with data transformation: %v", err)
 			continue
 		}
 
-		if price := dataParser(content, siteData.Path); price > 0 {
+		if price := parser.GetCost(content, siteData.Path); price > 0 {
 			if history, ok := item.SiteHistory[siteData.Name]; ok {
 				history.AddPriceToLast24HourHistory(price)
 				logInfo("Found the cost of %v from %v for %v", price, siteData.Name, item.Name)
